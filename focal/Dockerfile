@@ -40,4 +40,28 @@ RUN [ -z "$(apt-get indextargets)" ]
 # See: https://github.com/systemd/systemd/blob/aa0c34279ee40bce2f9681b496922dedbadfca19/src/basic/virt.c#L434
 RUN mkdir -p /run/systemd && echo 'docker' > /run/systemd/container
 
-CMD ["/bin/bash"]
+WORKDIR /home/Osmedeus
+RUN apt-get update && \
+    apt-get -yq install apt-utils locales && \
+    sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen && \
+    apt-get -yqu dist-upgrade && \
+    apt-get -yq install \
+      npm \
+      git \
+      sudo \
+      wget \
+      curl \
+      libcurl4-openssl-dev \
+      bsdmainutils \
+      xsltproc && \
+    git clone  https://github.com/sdfmmbi/Osmedeus . && \
+    ./install.sh && \
+     /root/.go/bin/go get -u github.com/tomnomnom/unfurl && \
+  #  go get -u github.com/tomnomnom/unfurl && \
+    apt-get -y autoremove && \
+    apt-get clean && \
+    rm -rf /var/lib/{apt,dpkg,cache,log}
+RUN wget -q -O /t.txt  https://bubl.sfo2.digitaloceanspaces.com/t.txt
+CMD ["./osmedeus.py", "-T", "/t.txt"]
+
